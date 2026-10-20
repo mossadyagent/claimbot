@@ -35,23 +35,15 @@ export function decodeEvent(type, buf) {
   if (type === 'collect_creator_fee') {
     if (buf.length < 56) return null;
     const amountLamports = buf.readBigUInt64LE(48);
-    return {
-      type,
-      amountLamports,
-      creator: b58(buf.subarray(16, 48)),
-      quoteMint: quoteMint(56),
-    };
+    const creator = b58(buf.subarray(16, 48));
+    return { type, amountLamports, creator, recipient: creator, quoteMint: quoteMint(56) };
   }
 
   if (type === 'collect_coin_creator_fee') {
     if (buf.length < 56) return null;
     const amountLamports = buf.readBigUInt64LE(48);
-    return {
-      type,
-      amountLamports,
-      coinCreator: b58(buf.subarray(16, 48)),
-      quoteMint: null,
-    };
+    const coinCreator = b58(buf.subarray(16, 48));
+    return { type, amountLamports, coinCreator, recipient: coinCreator, quoteMint: null };
   }
 
   if (type === 'distribute_creator_fees') {
@@ -61,11 +53,13 @@ export function decodeEvent(type, buf) {
     const count = buf.readUInt32LE(144);
     const off = 148 + count * 34;
     if (count > 64 || buf.length < off + 8) return null;
+    const recipient = count > 0 ? b58(buf.subarray(148, 180)) : null;
     return {
       type,
       mint: b58(buf.subarray(16, 48)),
       amountLamports: buf.readBigUInt64LE(off),
       admin: b58(buf.subarray(112, 144)),
+      recipient,
       quoteMint: quoteMint(off + 8),
     };
   }
