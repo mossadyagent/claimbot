@@ -282,7 +282,15 @@ export class Bot {
         this.#skip('sem_grupo');
         continue;
       }
-      const html = formatClaimCard({ amountSol, solUsd, tokens, signature, mcapLimit: limitUsd, claimer: event.recipient });
+      const html = formatClaimCard({
+        amountSol,
+        solUsd,
+        tokens,
+        signature,
+        mcapLimit: limitUsd,
+        claimer: event.recipient,
+        kind: event.type,
+      });
       this.stats.alerts++;
 
       if (this.cfg.dryRun) {
