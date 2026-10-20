@@ -199,6 +199,11 @@ export class Bot {
     for (const event of events) {
       const label = EVENT_LABEL[event.type] ?? event.type;
 
+      if (!this.cfg.alertTypes.has(event.type)) {
+        this.#skip(`tipo_${event.type}`);
+        continue;
+      }
+
       if (event.quoteMint) {
         this.#skip('moeda_em_outro_quote');
         continue;
