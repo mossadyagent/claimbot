@@ -21,11 +21,16 @@ const log = createLogger(cfg.logLevel);
 
 // ── --test: envia um card de exemplo para confirmar que o Telegram esta ok ──
 if (argv.includes('--test')) {
-  if (!cfg.telegramToken || !cfg.telegramChatId) {
-    log.error('configure TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID no .env');
+  if (!cfg.telegramToken) {
+    log.error('configure TELEGRAM_BOT_TOKEN');
     process.exit(1);
   }
   const telegram = new Telegram(cfg.telegramToken, cfg.telegramChatId, log);
+  if (!telegram.chatId) await telegram.discoverChat();
+  if (!telegram.chatId) {
+    log.error('o bot nao esta em nenhum grupo. Adicione o bot ao grupo e rode de novo.');
+    process.exit(1);
+  }
   const html = formatClaimCard({
     amountSol: 12.34,
     solUsd: 170,
