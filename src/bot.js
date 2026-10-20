@@ -1,5 +1,5 @@
 import { AMM, EVENT_LABEL, PUMP, decodeLogs, parseNotification } from './decoder.js';
-import { poolBaseMint, receivedLamports, sweptMints } from './attribution.js';
+import { poolBaseMint, sweptMints } from './attribution.js';
 import { formatClaimCard } from './format.js';
 import { Rpc, sleep } from './rpc.js';
 import { Market } from './market.js';
@@ -217,41 +217,33 @@ export class Bot {
 
       const limitUsd = await this.#limitUsd();
       const mints = [];
+      let parsed = null;
 
-      // fee sharing: the event already names the coin, so check the market cap
-      // before spending an RPC call on the amount.
       if (event.mint) {
-        const info = await this.market.token(event.mint);
-        const mcap = info?.mcapUsd ?? 0;
-        if (mcap <= 0 || mcap > limitUsd) {
-          this.#skip('mcap_acima_do_limite');
+        // fee sharing: mint e valor vem do proprio evento, sem gastar RPC
+        mints.push(event.mint);
+      } else {
+        parsed = await getTx();
+        if (!parsed || parsed.meta?.err) {
+          this.#skip('tx_indisponivel');
           continue;
         }
-        mints.push(event.mint);
+        const sweep = sweptMints(parsed);
+        if (sweep.quotes.length > 0 && !sweep.quotes.includes(WSOL)) {
+          this.#skip('moeda_em_outro_quote');
+          continue;
+        }
+        for (const pool of sweep.pools) {
+          const mint = await this.#poolMint(pool);
+          if (mint) mints.push(mint);
+        }
+        mints.push(...sweep.mints);
       }
 
-      const parsed = await getTx();
-      if (!parsed || parsed.meta?.err) {
-        this.#skip('tx_indisponivel');
+      if (amountLamports === null) {
+        this.#skip('valor_desconhecido');
         continue;
       }
-
-      if (amountLamports === null) amountLamports = receivedLamports(parsed);
-      if (amountLamports < this.minLamports) {
-        this.#skip('abaixo_do_minimo');
-        continue;
-      }
-
-      const sweep = sweptMints(parsed);
-      if (sweep.quotes.length > 0 && !sweep.quotes.includes(WSOL)) {
-        this.#skip('moeda_em_outro_quote');
-        continue;
-      }
-      for (const pool of sweep.pools) {
-        const mint = await this.#poolMint(pool);
-        if (mint) mints.push(mint);
-      }
-      mints.push(...sweep.mints);
 
       const uniqueMints = [...new Set(mints.filter(Boolean))].slice(0, MAX_TOKENS_PER_ALERT);
       if (uniqueMints.length === 0) {
@@ -297,7 +289,7 @@ export class Bot {
         this.log.info(`[DRY] ${html.replace(/<[^>]+>/g, '').replace(/\n/g, ' | ')}`);
         for (const winner of winners) this.state.setCooldown(winner.mint, this.cfg.cooldownMin);
       } else {
-        const lag = parsed.blockTime ? Math.max(0, Math.round(Date.now() / 1000) - parsed.blockTime) : null;
+        const lag = parsed?.blockTime ? Math.max(0, Math.round(Date.now() / 1000) - parsed?.blockTime) : null;
         const ok = await this.telegram.send(html);
         if (!ok) {
           this.#skip('falha_no_telegram');
