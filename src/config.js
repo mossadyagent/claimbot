@@ -72,8 +72,8 @@ export function loadConfig(argv = process.argv.slice(2)) {
     fees: 'pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ',
   };
 
-  if (!cfg.dryRun && (!cfg.telegramToken || !cfg.telegramChatId)) {
-    throw new Error('TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID sao obrigatorios (ou use --dry).');
+  if (!cfg.dryRun && !cfg.telegramToken) {
+    throw new Error('TELEGRAM_BOT_TOKEN e obrigatorio (ou use --dry).');
   }
   return cfg;
 }
