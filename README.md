@@ -38,7 +38,7 @@ então o buraco entre um ciclo e outro é de ~1 minuto (o GitHub não deixa uma 
 | `MIN_CLAIM_SOL` | `10` | valor mínimo do claim |
 | `MAX_MCAP_USD` | `500000` | market cap máximo em USD |
 | `WATCH_AMM` | `true` | `false` = ignora tokens graduados |
-| `ALERT_TYPES` | `collect_creator_fee,collect_coin_creator_fee` | quais claims viram alerta. `distribute_creator_fees` = claim de recipiente (fee sharing), desligado por padrão |
+| `ALERT_TYPES` | `collect_creator_fee,collect_coin_creator_fee,distribute_creator_fees` | quais claims viram alerta |
 
 Vale na próxima execução (a cada 6 h). Para mudar na hora: Actions → Run workflow.
 
