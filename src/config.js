@@ -57,11 +57,11 @@ export function loadConfig(argv = process.argv.slice(2)) {
     maxMcapSol: num(env.MAX_MCAP_SOL, 0),
     cooldownMin: num(env.COOLDOWN_MIN, 30),
     watchAmm: String(env.WATCH_AMM ?? 'true').toLowerCase() !== 'false',
-    // Tipos de evento que viram alerta: claim do dev na curva, na AMM e a
-    // distribuicao de fee sharing (que tambem paga o dev / os recipientes).
-    // O valor vem do proprio evento em todos os tres.
+    // Tipos de evento que viram alerta. So o claim do dev (curva e AMM).
+    // "distribute_creator_fees" (fee sharing) fica fora: e distribuicao automatica
+    // de taxa, nao o dev sacando, e era a origem do spam.
     alertTypes: new Set(
-      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee,distribute_creator_fees')
+      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee')
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
