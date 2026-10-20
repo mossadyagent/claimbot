@@ -286,17 +286,22 @@ export class Bot {
         continue;
       }
       const html = formatClaimCard({ amountSol, solUsd, tokens, signature, mcapLimit: limitUsd });
-      for (const winner of winners) this.state.setCooldown(winner.mint, this.cfg.cooldownMin);
       this.stats.alerts++;
 
       if (this.cfg.dryRun) {
         this.log.info(`[DRY] ${html.replace(/<[^>]+>/g, '').replace(/\n/g, ' | ')}`);
+        for (const winner of winners) this.state.setCooldown(winner.mint, this.cfg.cooldownMin);
       } else {
         const lag = parsed.blockTime ? Math.max(0, Math.round(Date.now() / 1000) - parsed.blockTime) : null;
+        const ok = await this.telegram.send(html);
+        if (!ok) {
+          this.#skip('falha_no_telegram');
+          continue;
+        }
+        for (const winner of winners) this.state.setCooldown(winner.mint, this.cfg.cooldownMin);
         this.log.info(
           `alerta: ${amountSol.toFixed(2)} SOL · ${winners.map((t) => t.symbol ?? t.mint.slice(0, 6)).join(', ')} · ${label}${lag !== null ? ` · +${lag}s` : ''}`,
         );
-        this.telegram.send(html);
       }
     }
   }
@@ -335,8 +340,13 @@ export class Bot {
   async #announceOnline() {
     for (let attempt = 0; !this.stopped; attempt++) {
       if (await this.#ensureChat()) {
+        // espera 60s para o card de boot trazer o estado real do stream
+        await sleep(60_000);
+        const secs = Math.max(1, Math.round((Date.now() - this.stats.startedAt) / 1000));
+        const rate = Math.round(this.stats.msgs / secs);
+        const warnings = rate === 0 ? '\n⚠️ stream sem dados ainda — pode ser conexão' : '';
         this.telegram.send(
-          `✅ <b>ClaimBot online</b>\nclaim ≥ ${this.cfg.minClaimSol} SOL · mcap ≤ ${this.maxMcapLabel()}`,
+          `✅ <b>ClaimBot online</b>\nstream: ${rate} eventos/s · ${this.stats.claims} claims vistos\nfiltro: ≥ ${this.cfg.minClaimSol} SOL · mcap ≤ ${this.maxMcapLabel()}${warnings}`,
         );
         return;
       }
