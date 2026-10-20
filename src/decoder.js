@@ -55,13 +55,18 @@ export function decodeEvent(type, buf) {
   }
 
   if (type === 'distribute_creator_fees') {
-    if (buf.length < 48) return null;
-    // amount is not reliably readable from the event; caller falls back to balance deltas
+    // timestamp(8) mint(32) bonding_curve(32) sharing_config(32) admin(32)
+    // Vec<Shareholder{address(32), share_bps(u16)}>  distributed(u64)  quote_mint(32)
+    if (buf.length < 148) return null;
+    const count = buf.readUInt32LE(144);
+    const off = 148 + count * 34;
+    if (count > 64 || buf.length < off + 8) return null;
     return {
       type,
       mint: b58(buf.subarray(16, 48)),
-      amountLamports: null,
-      admin: buf.length >= 144 ? b58(buf.subarray(112, 144)) : null,
+      amountLamports: buf.readBigUInt64LE(off),
+      admin: b58(buf.subarray(112, 144)),
+      quoteMint: quoteMint(off + 8),
     };
   }
 
