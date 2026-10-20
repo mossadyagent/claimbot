@@ -8,6 +8,10 @@ on:
     - cron: '23 */6 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: claimbot
+  cancel-in-progress: true
+
 jobs:
   run:
     runs-on: ubuntu-latest
