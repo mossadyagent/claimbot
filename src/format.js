@@ -26,7 +26,7 @@ const short = (mint) => `${mint.slice(0, 6)}…${mint.slice(-4)}`;
  * market caps marked, and the CA of the first qualifying token called out.
  */
 export function formatClaimCard(claim) {
-  const { amountSol, solUsd, tokens, signature, mcapLimit } = claim;
+  const { amountSol, solUsd, tokens, signature, mcapLimit, claimer } = claim;
   const usd = solUsd > 0 ? ` <i>($${Math.round(amountSol * solUsd).toLocaleString('en-US')})</i>` : '';
   const lines = [`🟢 <b>CLAIM ${formatAmount(amountSol)} SOL</b>${usd}`];
 
@@ -48,6 +48,8 @@ export function formatClaimCard(claim) {
     if (tokens.length > 6) lines.push(`… +${tokens.length - 6}`);
     if (primary) lines.push(`<code>${primary.mint}</code>`);
   }
+
+  if (claimer) lines.push(`👤 <code>${short(claimer)}</code>`);
 
   const links = [
     primary ? `<a href="https://axiom.trade/t/${primary.mint}">Axiom</a>` : null,
