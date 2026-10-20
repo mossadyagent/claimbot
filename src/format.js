@@ -26,9 +26,13 @@ const short = (mint) => `${mint.slice(0, 6)}…${mint.slice(-4)}`;
  * market caps marked, and the CA of the first qualifying token called out.
  */
 export function formatClaimCard(claim) {
-  const { amountSol, solUsd, tokens, signature, mcapLimit, claimer } = claim;
+  const { amountSol, solUsd, tokens, signature, mcapLimit, claimer, kind } = claim;
+  const family =
+    kind === 'distribute_creator_fees'
+      ? { emoji: '🟡', note: '⚠️ fee sharing — o Axiom nem sempre marca como claim' }
+      : { emoji: '🟢', note: null };
   const usd = solUsd > 0 ? ` <i>($${Math.round(amountSol * solUsd).toLocaleString('en-US')})</i>` : '';
-  const lines = [`🟢 <b>CLAIM ${formatAmount(amountSol)} SOL</b>${usd}`];
+  const lines = [`${family.emoji} <b>CLAIM ${formatAmount(amountSol)} SOL</b>${usd}`];
 
   const winners = tokens.filter((t) => t.qualifies);
   const primary = winners[0] ?? tokens[0];
@@ -50,6 +54,7 @@ export function formatClaimCard(claim) {
   }
 
   if (claimer) lines.push(`👤 <code>${short(claimer)}</code>`);
+  if (family.note) lines.push(`<i>${family.note}</i>`);
 
   const links = [
     primary ? `<a href="https://axiom.trade/t/${primary.mint}">Axiom</a>` : null,
