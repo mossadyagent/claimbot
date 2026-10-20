@@ -250,6 +250,12 @@ export class Bot {
         this.#skip('sem_atribuicao');
         continue;
       }
+      // Um claim que varre vários tokens não pode ser atribuído a cada um deles:
+      // isso fazia aparecer alerta em token que não teve claim nenhum.
+      if (uniqueMints.length > 1) {
+        this.#skip('claim_agregado');
+        continue;
+      }
 
       const solUsd = await this.market.solUsd();
       const tokens = [];
