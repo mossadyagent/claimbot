@@ -25,10 +25,11 @@ test('collect_coin_creator_fee: valor do claim na AMM', () => {
   assert.equal(ev.coinCreator, 'CvdSukvawHcciHifAYiMcxp7JjYqgtCpxzSeMWEd96EF');
 });
 
-test('distribute_creator_fees: mint no evento, valor vem dos saldos', () => {
+test('distribute_creator_fees: mint e valor no proprio evento', () => {
   const ev = decodeEvent('distribute_creator_fees', Buffer.from(HEX.distribute, 'hex'));
   assert.equal(ev.mint, 'CZeDLLXqSU8MFzvpcHBYDzn7BinUNmTfnrENd8gjpump');
-  assert.equal(ev.amountLamports, null);
+  assert.equal(ev.amountLamports, 13681054n);
+  assert.equal(ev.quoteMint, null);
 });
 
 test('buffers curtos nao quebram', () => {
