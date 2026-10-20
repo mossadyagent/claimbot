@@ -1,0 +1,43 @@
+name: claimbot
+
+# Roda o bot na nuvem do GitHub, de graça, sem usar nada do seu PC.
+# 4 execucoes por dia de ~5h45 -> fica ligado ~23h/dia.
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: claimbot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: conferir secrets
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::error::Configure os secrets TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID"
+            exit 1
+          fi
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: rodar
+        run: node src/index.js --for 20700
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MIN_CLAIM_SOL: ${{ vars.MIN_CLAIM_SOL || '10' }}
+          MAX_MCAP_USD: ${{ vars.MAX_MCAP_USD || '500000' }}
+          WATCH_AMM: ${{ vars.WATCH_AMM || 'true' }}
+          LOG_LEVEL: info
