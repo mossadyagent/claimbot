@@ -333,17 +333,17 @@ export class Bot {
   }
 
   async #announceOnline() {
-    for (let attempt = 0; attempt < 10 && !this.stopped; attempt++) {
+    for (let attempt = 0; !this.stopped; attempt++) {
       if (await this.#ensureChat()) {
         this.telegram.send(
           `✅ <b>ClaimBot online</b>\nclaim ≥ ${this.cfg.minClaimSol} SOL · mcap ≤ ${this.maxMcapLabel()}`,
         );
         return;
       }
-      await sleep(30_000);
-    }
-    if (!this.stopped) {
-      this.log.warn('nenhum grupo encontrado: adicione o bot ao grupo para receber os alertas');
+      if (attempt === 0 || attempt % 10 === 0) {
+        this.log.info('esperando o bot ser adicionado a um grupo do Telegram...');
+      }
+      await sleep(60_000);
     }
   }
 
