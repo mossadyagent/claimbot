@@ -29,7 +29,7 @@ export function formatClaimCard(claim) {
   const { amountSol, solUsd, tokens, signature, mcapLimit, claimer, kind } = claim;
   const family =
     kind === 'distribute_creator_fees'
-      ? { emoji: '🟡', note: '⚠️ fee sharing — o Axiom nem sempre marca como claim' }
+      ? { emoji: '🟡', note: '⚠️ <b>SINAL FALSO</b> — fee sharing (o Axiom nem sempre marca)' }
       : { emoji: '🟢', note: null };
   const usd = solUsd > 0 ? ` <i>($${Math.round(amountSol * solUsd).toLocaleString('en-US')})</i>` : '';
   const lines = [`${family.emoji} <b>CLAIM ${formatAmount(amountSol)} SOL</b>${usd}`];
