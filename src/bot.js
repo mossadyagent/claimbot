@@ -1,7 +1,7 @@
 import { AMM, EVENT_LABEL, PUMP, decodeLogs, parseNotification } from './decoder.js';
 import { poolBaseMint, receivedLamports, sweptMints } from './attribution.js';
 import { formatClaimCard } from './format.js';
-import { Rpc } from './rpc.js';
+import { Rpc, sleep } from './rpc.js';
 import { Market } from './market.js';
 import { Telegram } from './telegram.js';
 import { State } from './state.js';
@@ -57,11 +57,7 @@ export class Bot {
     this.heartbeatTimer = setInterval(() => this.#heartbeat(), 15_000);
     this.#connect();
 
-    if (!this.cfg.dryRun && this.cfg.startupMessage) {
-      this.telegram.send(
-        `✅ <b>ClaimBot online</b>\nclaim ≥ ${this.cfg.minClaimSol} SOL · mcap ≤ ${this.maxMcapLabel()}\n<i>deixe a janela aberta; os alertas chegam aqui</i>`,
-      );
-    }
+    if (!this.cfg.dryRun && this.cfg.startupMessage) this.#announceOnline();
   }
 
   stop() {
@@ -284,6 +280,11 @@ export class Bot {
         this.#skip(tokens.some((t) => t.qualifies) ? 'cooldown' : 'mcap_acima_do_limite');
         continue;
       }
+
+      if (!this.cfg.dryRun && !(await this.#ensureChat())) {
+        this.#skip('sem_grupo');
+        continue;
+      }
       const html = formatClaimCard({ amountSol, solUsd, tokens, signature, mcapLimit: limitUsd });
       for (const winner of winners) this.state.setCooldown(winner.mint, this.cfg.cooldownMin);
       this.stats.alerts++;
@@ -322,6 +323,28 @@ export class Bot {
 
   #skip(reason) {
     this.stats.skipped.set(reason, (this.stats.skipped.get(reason) ?? 0) + 1);
+  }
+
+  /** Chat id comes from config, or is discovered from the group the bot was added to. */
+  async #ensureChat() {
+    if (!this.telegram) return true;
+    if (this.telegram.chatId) return true;
+    return Boolean(await this.telegram.discoverChat());
+  }
+
+  async #announceOnline() {
+    for (let attempt = 0; attempt < 10 && !this.stopped; attempt++) {
+      if (await this.#ensureChat()) {
+        this.telegram.send(
+          `✅ <b>ClaimBot online</b>\nclaim ≥ ${this.cfg.minClaimSol} SOL · mcap ≤ ${this.maxMcapLabel()}`,
+        );
+        return;
+      }
+      await sleep(30_000);
+    }
+    if (!this.stopped) {
+      this.log.warn('nenhum grupo encontrado: adicione o bot ao grupo para receber os alertas');
+    }
   }
 
   summary() {
