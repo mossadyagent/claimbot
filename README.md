@@ -7,21 +7,25 @@ Roda **na nuvem do GitHub, de graça**, ~23h por dia. Seu PC não roda nada.
 
 ---
 
-## Como ligar (2 passos, depois que o repositório já existe)
+## Como ligar
 
-### 1. Configure os dois segredos
+### 1. Coloque o bot no grupo
+Adicione o bot (o @usuario criado no BotFather) ao seu grupo do Telegram.
+O bot descobre o grupo sozinho — não precisa informar chat id.
+
+### 2. Configure o token
 No repositório: **Settings → Secrets and variables → Actions → New repository secret**
 
 | Nome | Valor |
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | token do @BotFather |
-| `TELEGRAM_CHAT_ID` | id do grupo (`-100...`) |
 
-### 2. Ligue
+### 3. Ligue
 **Actions → claimbot → Run workflow**.
 Em ~30 s chega **"ClaimBot online"** no grupo.
 
-Daí em diante roda sozinho: 4 ciclos por dia de ~5h45 (cron a cada 6 h).
+Daí em diante roda sozinho: cada execução dura 5h59 e o cron dispara a cada 6h,
+então o buraco entre um ciclo e outro é de ~1 minuto (o GitHub não deixa uma execução passar de 6h).
 
 ---
 
