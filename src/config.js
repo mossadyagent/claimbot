@@ -57,6 +57,15 @@ export function loadConfig(argv = process.argv.slice(2)) {
     maxMcapSol: num(env.MAX_MCAP_SOL, 0),
     cooldownMin: num(env.COOLDOWN_MIN, 30),
     watchAmm: String(env.WATCH_AMM ?? 'true').toLowerCase() !== 'false',
+    // Tipos de evento que viram alerta. "distribute_creator_fees" e o claim de
+    // recipiente (fee sharing, o que o Axiom chama de "Recipient Claim"), nao o
+    // claim do dev; fica desligado por padrao.
+    alertTypes: new Set(
+      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
     // 0 = sem limite; acima disso o bot se desliga sozinho (protege internet/plano)
     maxSessionGb: Number(env.MAX_SESSION_GB) > 0 ? Number(env.MAX_SESSION_GB) : 0,
     startupMessage: String(env.STARTUP_MESSAGE ?? 'true').toLowerCase() !== 'false',
