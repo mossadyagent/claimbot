@@ -57,11 +57,11 @@ export function loadConfig(argv = process.argv.slice(2)) {
     maxMcapSol: num(env.MAX_MCAP_SOL, 0),
     cooldownMin: num(env.COOLDOWN_MIN, 30),
     watchAmm: String(env.WATCH_AMM ?? 'true').toLowerCase() !== 'false',
-    // Tipos de evento que viram alerta. "distribute_creator_fees" e o claim de
-    // recipiente (fee sharing, o que o Axiom chama de "Recipient Claim"), nao o
-    // claim do dev; fica desligado por padrao.
+    // Tipos de evento que viram alerta: claim do dev na curva, na AMM e a
+    // distribuicao de fee sharing (que tambem paga o dev / os recipientes).
+    // O valor vem do proprio evento em todos os tres.
     alertTypes: new Set(
-      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee')
+      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee,distribute_creator_fees')
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
