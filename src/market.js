@@ -97,5 +97,9 @@ export class Market {
 
 function bestPair(pairs) {
   if (!Array.isArray(pairs) || pairs.length === 0) return null;
-  return pairs.reduce((a, b) => ((Number(b.liquidity?.usd) || 0) > (Number(a.liquidity?.usd) || 0) ? b : a));
+  // Pools sem liquidez são pares mortos: o par "pumpfun" antigo fica congelado no
+  // preço da graduação (~US$ 44k) e mentia o market cap. Só usa pool viva.
+  const live = pairs.filter((p) => (Number(p.liquidity?.usd) || 0) > 0);
+  const pool = live.length > 0 ? live : pairs;
+  return pool.reduce((a, b) => ((Number(b.liquidity?.usd) || 0) > (Number(a.liquidity?.usd) || 0) ? b : a));
 }
