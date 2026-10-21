@@ -54,6 +54,8 @@ jobs:
           MIN_CLAIM_SOL: ${{ vars.MIN_CLAIM_SOL || '10' }}
           MAX_MCAP_USD: ${{ vars.MAX_MCAP_USD || '500000' }}
           WATCH_AMM: ${{ vars.WATCH_AMM || 'true' }}
+          STARTUP_MESSAGE: 'false'
+          CYCLE_SUMMARY: 'false'
           LOG_LEVEL: info
 
       - name: avisar falha
