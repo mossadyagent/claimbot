@@ -51,8 +51,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          MIN_CLAIM_SOL: ${{ vars.MIN_CLAIM_SOL || '10' }}
+          MIN_CLAIM_SOL: ${{ vars.MIN_CLAIM_SOL || '1' }}
           MAX_MCAP_USD: ${{ vars.MAX_MCAP_USD || '500000' }}
+          COOLDOWN_MIN: ${{ vars.COOLDOWN_MIN || '0' }}
           WATCH_AMM: ${{ vars.WATCH_AMM || 'true' }}
           STARTUP_MESSAGE: 'false'
           CYCLE_SUMMARY: 'false'
