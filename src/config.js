@@ -69,6 +69,7 @@ export function loadConfig(argv = process.argv.slice(2)) {
     // 0 = sem limite; acima disso o bot se desliga sozinho (protege internet/plano)
     maxSessionGb: Number(env.MAX_SESSION_GB) > 0 ? Number(env.MAX_SESSION_GB) : 0,
     startupMessage: String(env.STARTUP_MESSAGE ?? 'true').toLowerCase() !== 'false',
+    cycleSummary: String(env.CYCLE_SUMMARY ?? 'true').toLowerCase() !== 'false',
     rpcUrls,
     wsUrls,
     dryRun: dryFlag || String(env.DRY_RUN).toLowerCase() === 'true',
