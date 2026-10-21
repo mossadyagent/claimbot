@@ -57,6 +57,7 @@ jobs:
           WATCH_AMM: ${{ vars.WATCH_AMM || 'true' }}
           STARTUP_MESSAGE: 'false'
           CYCLE_SUMMARY: 'false'
+          DRY_RUN: 'true'
           LOG_LEVEL: info
 
       - name: avisar falha
