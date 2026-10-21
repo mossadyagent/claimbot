@@ -62,7 +62,7 @@ const bot = new Bot(cfg, log);
 async function shutdown(code = 0) {
   bot.stop();
   log.info(bot.summary());
-  if (!cfg.dryRun && bot.telegram) {
+  if (!cfg.dryRun && bot.telegram && cfg.cycleSummary) {
     const mins = Math.round((Date.now() - bot.stats.startedAt) / 60000);
     await bot.telegram
       .send(`⏱ <b>Ciclo encerrado</b> · ${mins} min\nclaims vistos: ${bot.stats.claims} · alertas: ${bot.stats.alerts}`)
