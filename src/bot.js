@@ -386,9 +386,19 @@ export class Bot {
 
     const skipped = [...this.stats.skipped.entries()].map(([k, v]) => `${k}=${v}`).join(' ') || 'nenhum';
     const gb = this.stats.bytes / 1e9;
+    const rate = dMsgs / secs;
     this.log.info(
-      `eventos/s=${(dMsgs / secs).toFixed(0)} · ${(dBytes / 1024 / secs).toFixed(0)} KB/s · sessao=${gb.toFixed(2)} GB · claims=${this.stats.claims} · alertas=${this.stats.alerts} · rpc=${this.stats.rpc} · fila=${this.queue.length} · pulados: ${skipped}`,
+      `eventos/s=${rate.toFixed(0)} · ${(dBytes / 1024 / secs).toFixed(0)} KB/s · sessao=${gb.toFixed(2)} GB · claims=${this.stats.claims} · alertas=${this.stats.alerts} · rpc=${this.stats.rpc} · fila=${this.queue.length} · pulados: ${skipped}`,
     );
+
+    // O RPC público às vezes mantém o socket aberto mas para de entregar (throttle).
+    // Se a taxa despencar, derruba a conexão para forçar um socket novo.
+    if (this.ws && this.ws.readyState === 1 && rate < 50 && now - this.stats.startedAt > 120_000) {
+      this.log.warn(`stream lento (${rate.toFixed(0)} eventos/s); forçando reconexão`);
+      try {
+        this.ws.close();
+      } catch {}
+    }
 
     if (this.cfg.maxSessionGb > 0 && gb >= this.cfg.maxSessionGb) {
       this.log.warn(`limite de ${this.cfg.maxSessionGb} GB da sessao atingido; encerrando`);
