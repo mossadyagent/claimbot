@@ -52,16 +52,14 @@ export function loadConfig(argv = process.argv.slice(2)) {
   const cfg = {
     telegramToken: env.TELEGRAM_BOT_TOKEN || '',
     telegramChatId: env.TELEGRAM_CHAT_ID || '',
-    minClaimSol: num(env.MIN_CLAIM_SOL, 10),
+    minClaimSol: num(env.MIN_CLAIM_SOL, 1),
     maxMcapUsd: num(env.MAX_MCAP_USD, 500000),
     maxMcapSol: num(env.MAX_MCAP_SOL, 0),
-    cooldownMin: num(env.COOLDOWN_MIN, 30),
+    // aceita 0: com cooldown 0 o mesmo token pode alertar varias vezes seguidas
+    cooldownMin: Number(env.COOLDOWN_MIN) >= 0 && env.COOLDOWN_MIN !== '' ? Number(env.COOLDOWN_MIN) : 30,
     watchAmm: String(env.WATCH_AMM ?? 'true').toLowerCase() !== 'false',
-    // So o claim por token (fee sharing / recipient): o evento carrega mint e
-    // valor daquele token. Os collect_creator_fee sao por carteira do criador e
-    // somam varios tokens, entao o valor nao pertence ao token do card.
     alertTypes: new Set(
-      String(env.ALERT_TYPES || 'distribute_creator_fees')
+      String(env.ALERT_TYPES || 'collect_creator_fee,collect_coin_creator_fee,distribute_creator_fees')
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
