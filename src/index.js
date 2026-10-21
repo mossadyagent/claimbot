@@ -59,9 +59,15 @@ if (runSeconds > 0) log.info(`execucao de teste: encerra em ${runSeconds}s`);
 
 const bot = new Bot(cfg, log);
 
-function shutdown(code = 0) {
+async function shutdown(code = 0) {
   bot.stop();
   log.info(bot.summary());
+  if (!cfg.dryRun && bot.telegram) {
+    const mins = Math.round((Date.now() - bot.stats.startedAt) / 60000);
+    await bot.telegram
+      .send(`⏱ <b>Ciclo encerrado</b> · ${mins} min\nclaims vistos: ${bot.stats.claims} · alertas: ${bot.stats.alerts}`)
+      .catch(() => {});
+  }
   setTimeout(() => process.exit(code), 300);
 }
 
